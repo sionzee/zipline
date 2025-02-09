@@ -2,6 +2,7 @@ FROM node:22-alpine3.21 AS base
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+ENV PNPM_ENABLE_PRE_POST_SCRIPTS=1
 
 RUN npm install -g corepack && \
     corepack enable pnpm && \
@@ -14,9 +15,9 @@ COPY prisma ./prisma
 COPY package.json .
 COPY pnpm-lock.yaml .
 
-# Install all dependencies including devDependencies
-RUN pnpm install --frozen-lockfile && \
-    pnpm approve-builds
+# Install all dependencies including devDependencies and enable required scripts
+RUN echo '@prisma/client\n@prisma/engines\nargon2\nesbuild\nprisma\nsharp' > .pnpmrc && \
+    pnpm install --frozen-lockfile
 
 # Copy source files
 COPY src ./src
