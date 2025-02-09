@@ -14,8 +14,9 @@ COPY prisma ./prisma
 COPY package.json .
 COPY pnpm-lock.yaml .
 
-# Install dependencies
-RUN pnpm install --prod --frozen-lockfile
+# Install all dependencies including devDependencies
+RUN pnpm install --frozen-lockfile && \
+    pnpm approve-builds
 
 # Copy source files
 COPY src ./src
@@ -32,6 +33,9 @@ ENV NEXT_TELEMETRY_DISABLED=1 \
 # Build the application
 RUN ZIPLINE_BUILD=true pnpm run build && \
     pnpm build:prisma
+
+# Prune dev dependencies
+RUN pnpm prune --prod
 
 # Clean up
 RUN rm -rf /tmp/* /root/*
